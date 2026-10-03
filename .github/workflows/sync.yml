@@ -1,0 +1,28 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    # 每天定时自动同步一次（UTC 时间 0 点，对应北京时间早 8 点）
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 保留手动一键运行按钮
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Sync upstream
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/eternity4719/HowToLiveBetter.git
+          git fetch upstream
+          git checkout main
+          git merge upstream/main --ff-only || exit 0
+          git push origin main
